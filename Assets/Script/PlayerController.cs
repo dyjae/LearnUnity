@@ -16,6 +16,12 @@ public class PlayerController : MonoBehaviour
     // 跳跃
     public float jumpforce;
 
+    // 地面图层
+    public LayerMask grouder;
+
+    // 玩家碰撞体
+    public Collider2D coll;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -27,6 +33,7 @@ public class PlayerController : MonoBehaviour
     {
         Debug.Log("移动了");
         Movement();
+        SwitchAnim();
     }
 
     void Movement()
@@ -50,6 +57,25 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Jump"))
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
+            anim.SetBool("jumping", true);
+        }
+    }
+
+    void SwitchAnim()
+    {
+        anim.SetBool("idle", false);
+        if (anim.GetBool("jumping"))
+        {//跳跃时
+            if (rb.velocity.y < 0)
+            {
+                anim.SetBool("jumping", false);
+                anim.SetBool("failing", true);
+            }
+        }
+        else if (coll.IsTouchingLayers(grouder))
+        {//落地时
+            anim.SetBool("failing", false);
+            anim.SetBool("idle", true);
         }
     }
 }
