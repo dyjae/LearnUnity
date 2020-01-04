@@ -7,6 +7,9 @@ public class PlayerController : MonoBehaviour
     // 角色刚体
     public Rigidbody2D rb;
 
+    // 动画
+    public Animator anim;
+
     // 速度
     public float speed = 10f;
 
@@ -36,11 +39,14 @@ public class PlayerController : MonoBehaviour
         if (horizontalMove != 0)
         {
             rb.velocity = new Vector2(horizontalMove * speed * Time.deltaTime, rb.velocity.y);
+            anim.SetFloat("running", Mathf.Abs(facedirection));
         }
+        // 转向
         if(facedirection != 0)
         {
             transform.localScale = new Vector3(facedirection, 1, 1);
         }
+        // 跳跃
         if (Input.GetButtonDown("Jump"))
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
