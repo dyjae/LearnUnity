@@ -27,6 +27,8 @@ public class PlayerController : MonoBehaviour
 
     public Text CherryNumber;
 
+    private bool isHurt;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,9 +39,13 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        //Debug.Log("移动了");
-        Movement();
+        if (!isHurt)
+        {
+            //Debug.Log("移动了");
+            Movement();
+        }
         SwitchAnim();
+
     }
 
     void Movement()
@@ -77,6 +83,19 @@ public class PlayerController : MonoBehaviour
                 anim.SetBool("failing", true);
             }
         }
+        else if (isHurt)
+        {
+            anim.SetBool("hurting", true);
+            anim.SetFloat("running", 0);
+            if(Mathf.Abs(rb.velocity.x) < 0.1)
+            {
+                anim.SetBool("hurting", false);
+                anim.SetBool("idle", true);
+                isHurt = false;
+            }
+            
+            
+        }
         else if (coll.IsTouchingLayers(grouder))
         {//落地时
             anim.SetBool("failing", false);
@@ -97,16 +116,32 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (anim.GetBool("failing") && collision.gameObject.CompareTag("Enemy"))
-        {
-            //Debug.Log("JUMP");
-            this.Jump();
-            Destroy(collision.gameObject);
-        }
+        if (collision.gameObject.CompareTag("Enemy")) {
+            if (anim.GetBool("failing")) 
+                {
+                    //Debug.Log("JUMP");
+                    this.Jump();
+                    Destroy(collision.gameObject);
+                }else if (transform.position.x < collision.gameObject.transform.position.x)
+                {//左侧移动
+                    this.SetH(-10);
+                    isHurt = true;
+                }
+                else if (transform.position.x > collision.gameObject.transform.position.x)
+                {//右侧移动
+                    SetH(10);
+                    isHurt = true;
+                }
+            }
     }
 
     private void Jump() {
         rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
         anim.SetBool("jumping", true);
+    }
+
+    private void SetH(int h)
+    {
+        rb.velocity = new Vector2(h, rb.velocity.y);
     }
 }
