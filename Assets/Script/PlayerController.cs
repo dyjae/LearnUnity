@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -23,6 +24,8 @@ public class PlayerController : MonoBehaviour
     public Collider2D coll;
 
     private int cherry;
+
+    public Text CherryNumber;
 
     // Start is called before the first frame update
     void Start()
@@ -82,13 +85,14 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    //搜集物品
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Collection"))
         {
             Destroy(collision.gameObject);
             cherry++;
-            Debug.Log(""+cherry);
+            CherryNumber.text = cherry.ToString();
         }
     }
 }
