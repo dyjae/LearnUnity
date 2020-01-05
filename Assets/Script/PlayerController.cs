@@ -22,6 +22,8 @@ public class PlayerController : MonoBehaviour
     // 玩家碰撞体
     public Collider2D coll;
 
+    private int cherry;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -32,7 +34,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        Debug.Log("移动了");
+        //Debug.Log("移动了");
         Movement();
         SwitchAnim();
     }
@@ -42,7 +44,7 @@ public class PlayerController : MonoBehaviour
         //获取横向移动值
         float horizontalMove = Input.GetAxis("Horizontal");
         float facedirection = Input.GetAxisRaw("Horizontal"); //直接获得  -1，0，1
-        Debug.Log(horizontalMove);
+        //Debug.Log(horizontalMove);
         //不等于0时，表示有移动
         if (horizontalMove != 0)
         {
@@ -77,6 +79,16 @@ public class PlayerController : MonoBehaviour
         {//落地时
             anim.SetBool("failing", false);
             anim.SetBool("idle", true);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Collection"))
+        {
+            Destroy(collision.gameObject);
+            cherry++;
+            Debug.Log(""+cherry);
         }
     }
 }
