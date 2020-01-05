@@ -7,11 +7,19 @@ public class EnemyFrog : MonoBehaviour
 
     private Rigidbody2D rb;
 
+    private Collider2D coll;
+
+    private Animator anim;
+
+    public LayerMask ground;
+
     public Transform rightPoint,leftPoint;
 
     public bool isFaceLeft = true;
 
-    public float speed = 10;
+    public float speed = 2;
+
+    public float ySpeed = 1;
 
     private float leftx, rightx;
 
@@ -19,6 +27,8 @@ public class EnemyFrog : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        coll = GetComponent<CircleCollider2D>();
         transform.DetachChildren();
         leftx = leftPoint.position.x;
         rightx = rightPoint.position.x;
@@ -29,28 +39,56 @@ public class EnemyFrog : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        MoveMent();
+        //MoveMent();
+        SwitchAnima();
     }
 
-    void MoveMent()
+      void MoveMent()
     {
         if (isFaceLeft)
         {
-            rb.velocity = new Vector2(-speed, rb.velocity.y);
-            if(transform.position.x < leftPoint.position.x)
+            Debug.Log(coll.name);
+            if (coll.IsTouchingLayers(ground))
             {
+                anim.SetBool("jumping", true);
+                rb.velocity = new Vector2(-speed, ySpeed);
+            }
+            if(transform.position.x < leftx)
+            {
+                rb.velocity = new Vector2(speed, rb.velocity.y);
                 transform.localScale = new Vector3(-1, 1, 1);
                 isFaceLeft = false;
             }
         }
         else
         {
-            rb.velocity = new Vector2(speed, rb.velocity.y);
-            if (transform.position.x > rightPoint.position.x)
+            if (coll.IsTouchingLayers(ground))
             {
+                anim.SetBool("jumping", true);
+                rb.velocity = new Vector2(speed, ySpeed);
+            }
+            if (transform.position.x > rightx)
+            {
+                rb.velocity = new Vector2(-speed, rb.velocity.y);
                 transform.localScale = new Vector3(1, 1, 1);
                 isFaceLeft = true;
             }
+        }
+    }
+
+    void SwitchAnima()
+    {
+        if (anim.GetBool("jumping"))
+        {
+            if(rb.velocity.y < 0.1)
+            {
+                anim.SetBool("jumping", false);
+                anim.SetBool("failing", true);
+            }
+        }
+        if(coll.IsTouchingLayers(ground) && anim.GetBool("failing"))
+        {
+            anim.SetBool("failing",false);
         }
     }
 
