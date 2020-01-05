@@ -62,8 +62,7 @@ public class PlayerController : MonoBehaviour
         // 跳跃
         if (Input.GetButtonDown("Jump") && coll.IsTouchingLayers(grouder))
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
-            anim.SetBool("jumping", true);
+            this.Jump();
         }
     }
 
@@ -94,5 +93,20 @@ public class PlayerController : MonoBehaviour
             cherry++;
             CherryNumber.text = cherry.ToString();
         }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (anim.GetBool("failing") && collision.gameObject.CompareTag("Enemy"))
+        {
+            //Debug.Log("JUMP");
+            this.Jump();
+            Destroy(collision.gameObject);
+        }
+    }
+
+    private void Jump() {
+        rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
+        anim.SetBool("jumping", true);
     }
 }
