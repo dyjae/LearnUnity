@@ -5,10 +5,10 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     // 角色刚体
-    public Rigidbody2D rb;
+    [SerializeField] private Rigidbody2D rb;
 
     // 动画
-    public Animator anim;
+    private Animator anim;
 
     // 速度
     public float speed = 10f;
@@ -25,7 +25,8 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("开始了");
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
