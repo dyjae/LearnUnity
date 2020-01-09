@@ -121,8 +121,11 @@ public class PlayerController : MonoBehaviour
                 {
                     //Debug.Log("JUMP");
                     this.Jump();
-                    Destroy(collision.gameObject);
-                }else if (transform.position.x < collision.gameObject.transform.position.x)
+                Enemy enemy = collision.gameObject.GetComponent<Enemy>();
+                enemy.OnDead();
+                    //Destroy(collision.gameObject);
+                }
+            else if (transform.position.x < collision.gameObject.transform.position.x)
                 {//左侧移动
                     this.SetH(-10);
                     isHurt = true;

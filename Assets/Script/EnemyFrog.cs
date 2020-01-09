@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyFrog : MonoBehaviour
+public class EnemyFrog : Enemy
 {
 
-    private Rigidbody2D rb;
+    //private Rigidbody2D rb;
 
     private Collider2D coll;
 
-    private Animator anim;
+    //private Animator anim;
 
     public LayerMask ground;
 
@@ -24,10 +24,11 @@ public class EnemyFrog : MonoBehaviour
     private float leftx, rightx;
 
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>();
+        base.Start();
+        //rb = GetComponent<Rigidbody2D>();
+        //anim = GetComponent<Animator>();
         coll = GetComponent<CircleCollider2D>();
         transform.DetachChildren();
         leftx = leftPoint.position.x;
