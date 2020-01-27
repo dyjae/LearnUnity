@@ -36,6 +36,9 @@ public class PlayerController : MonoBehaviour
 
     public AudioSource hurtAudio;
 
+    // 操作杆
+    public Joystick joystick;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -62,33 +65,41 @@ public class PlayerController : MonoBehaviour
 
     void Movement()
     {
+
         //获取横向移动值
         float horizontalMove = Input.GetAxis("Horizontal");
-        float facedirection = Input.GetAxisRaw("Horizontal"); //直接获得  -1，0，1
+        // float facedirection = Input.GetAxisRaw("Horizontal"); //直接获得  -1，0，1
+        if (joystick.enabled && joystick.Horizontal != 0)
+        {
+            horizontalMove = joystick.Horizontal;
+        }
         //Debug.Log(horizontalMove);
         //不等于0时，表示有移动
         if (horizontalMove != 0)
         {
             rb.velocity = new Vector2(horizontalMove * speed * Time.deltaTime, rb.velocity.y);
-            anim.SetFloat("running", Mathf.Abs(facedirection));
+            anim.SetFloat("running", Mathf.Abs(horizontalMove));
         }
         // 转向
-        if(facedirection != 0)
+        if (horizontalMove > 0f)
         {
-            transform.localScale = new Vector3(facedirection, 1, 1);
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        else if (horizontalMove < 0f)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
         }
         // 跳跃
-        if (Input.GetButtonDown("Jump") && coll.IsTouchingLayers(grouder))
-        {
-            this.Jump();
-        }
+
+        this.Jump();
+
         //下蹲
         Crouch();
     }
 
     void SwitchAnim()
     {
-        
+
         if (anim.GetBool("jumping"))
         {//跳跃时
             if (rb.velocity.y < 0)
@@ -101,19 +112,19 @@ public class PlayerController : MonoBehaviour
         {
             anim.SetBool("hurting", true);
             anim.SetFloat("running", 0);
-            if(Mathf.Abs(rb.velocity.x) < 0.1)
+            if (Mathf.Abs(rb.velocity.x) < 0.1)
             {
                 anim.SetBool("hurting", false);
-                
+
                 isHurt = false;
             }
-            
-            
+
+
         }
         else if (coll.IsTouchingLayers(grouder))
         {//落地时
             anim.SetBool("failing", false);
-            
+
         }
     }
 
@@ -125,8 +136,9 @@ public class PlayerController : MonoBehaviour
         {
             Cherry cherryObj = collision.GetComponent<Cherry>();
             cherryObj.BeCollect();
-                  }
-        else if(collision.CompareTag("DeadLine")){
+        }
+        else if (collision.CompareTag("DeadLine"))
+        {
             GetComponent<AudioSource>().enabled = false;
             Invoke("Restart", 2f);
         }
@@ -134,31 +146,36 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemy")) {
-            if (anim.GetBool("failing")) 
-                {
-                    //Debug.Log("JUMP");
-                    this.Jump();
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            if (anim.GetBool("failing"))
+            {
+                //Debug.Log("JUMP");
+                this.Jump();
                 Enemy enemy = collision.gameObject.GetComponent<Enemy>();
                 enemy.OnDead();
-                    //Destroy(collision.gameObject);
-                }
-            else if (transform.position.x < collision.gameObject.transform.position.x)
-                {//左侧移动
-                    this.Hurt(-5);
-                    
-                }
-                else if (transform.position.x > collision.gameObject.transform.position.x)
-                {//右侧移动
-                Hurt(5);
-                                    }
+                //Destroy(collision.gameObject);
             }
+            else if (transform.position.x < collision.gameObject.transform.position.x)
+            {//左侧移动
+                this.Hurt(-5);
+
+            }
+            else if (transform.position.x > collision.gameObject.transform.position.x)
+            {//右侧移动
+                Hurt(5);
+            }
+        }
     }
 
-    private void Jump() {
-        jumpAudio.Play();
-        rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
-        anim.SetBool("jumping", true);
+    private void Jump()
+    {
+        if ((Input.GetButtonDown("Jump") || (joystick.enabled && joystick.Vertical > 0.5f)) && coll.IsTouchingLayers(grouder))
+        {
+            jumpAudio.Play();
+            rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
+            anim.SetBool("jumping", true);
+        }
     }
 
     private void Hurt(int h)
@@ -173,7 +190,7 @@ public class PlayerController : MonoBehaviour
     {
         if (!Physics2D.OverlapCircle(cellingCheck.position, 0.2f, grouder))//判断上面是否有碰撞物
         {
-            if (Input.GetButton("Crouch"))
+            if ( (joystick.enabled && joystick.Vertical < -0.5f)||Input.GetButton("Crouch"))
             {
                 anim.SetBool("crouching", true);
                 disColl.enabled = false;
@@ -184,15 +201,16 @@ public class PlayerController : MonoBehaviour
                 disColl.enabled = true;
             }
         }
-            
+
     }
 
-    private void Restart() {
+    private void Restart()
+    {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void AddCherry()
     {
         cherry++;
-     }
+    }
 }
