@@ -23,6 +23,10 @@ public class PlayerController : MonoBehaviour
     // 玩家碰撞体
     public Collider2D coll;
 
+    public Collider2D disColl;
+
+    public Transform cellingCheck;
+
     private int cherry;
 
     public Text CherryNumber;
@@ -74,6 +78,8 @@ public class PlayerController : MonoBehaviour
         {
             this.Jump();
         }
+        //下蹲
+        Crouch();
     }
 
     void SwitchAnim()
@@ -153,5 +159,24 @@ public class PlayerController : MonoBehaviour
         hurtAudio.Play();
         rb.velocity = new Vector2(h, rb.velocity.y);
         isHurt = true;
+    }
+
+    //下蹲
+    private void Crouch()
+    {
+        if (!Physics2D.OverlapCircle(cellingCheck.position, 0.2f, grouder))//判断上面是否有碰撞物
+        {
+            if (Input.GetButtonDown("Crouch"))
+            {
+                anim.SetBool("crouching", true);
+                disColl.enabled = false;
+            }
+            else if (Input.GetButtonUp("Crouch"))
+            {
+                anim.SetBool("crouching", false);
+                disColl.enabled = true;
+            }
+        }
+            
     }
 }
