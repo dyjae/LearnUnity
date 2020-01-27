@@ -29,6 +29,10 @@ public class PlayerController : MonoBehaviour
 
     private bool isHurt;
 
+    public AudioSource jumpAudio;
+
+    public AudioSource hurtAudio;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -108,7 +112,8 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.CompareTag("Collection"))
         {
-            Destroy(collision.gameObject);
+            Cherry cherryObj = collision.GetComponent<Cherry>();
+            cherryObj.BeCollect();
             cherry++;
             CherryNumber.text = cherry.ToString();
         }
@@ -127,24 +132,26 @@ public class PlayerController : MonoBehaviour
                 }
             else if (transform.position.x < collision.gameObject.transform.position.x)
                 {//左侧移动
-                    this.SetH(-10);
-                    isHurt = true;
+                    this.Hurt(-5);
+                    
                 }
                 else if (transform.position.x > collision.gameObject.transform.position.x)
                 {//右侧移动
-                    SetH(10);
-                    isHurt = true;
-                }
+                Hurt(5);
+                                    }
             }
     }
 
     private void Jump() {
+        jumpAudio.Play();
         rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
         anim.SetBool("jumping", true);
     }
 
-    private void SetH(int h)
+    private void Hurt(int h)
     {
+        hurtAudio.Play();
         rb.velocity = new Vector2(h, rb.velocity.y);
+        isHurt = true;
     }
 }

@@ -7,11 +7,14 @@ public class Enemy: MonoBehaviour
 
     protected Animator anim;
 
+    protected AudioSource deathAudio;
+
     // Start is called before the first frame update
     protected virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        deathAudio = GetComponent<AudioSource>();
     }
 
     private void IsDesdory() {
@@ -21,6 +24,7 @@ public class Enemy: MonoBehaviour
 
     public void OnDead()
     {
+        deathAudio.Play();
         anim.SetBool("deading", true);
     }
 }
