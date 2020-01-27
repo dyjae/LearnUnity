@@ -43,6 +43,11 @@ public class PlayerController : MonoBehaviour
         anim = GetComponent<Animator>();
     }
 
+    private void Update()
+    {
+        CherryNumber.text = cherry.ToString();
+    }
+
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -83,7 +88,7 @@ public class PlayerController : MonoBehaviour
 
     void SwitchAnim()
     {
-        anim.SetBool("idle", false);
+        
         if (anim.GetBool("jumping"))
         {//跳跃时
             if (rb.velocity.y < 0)
@@ -99,7 +104,7 @@ public class PlayerController : MonoBehaviour
             if(Mathf.Abs(rb.velocity.x) < 0.1)
             {
                 anim.SetBool("hurting", false);
-                anim.SetBool("idle", true);
+                
                 isHurt = false;
             }
             
@@ -108,7 +113,7 @@ public class PlayerController : MonoBehaviour
         else if (coll.IsTouchingLayers(grouder))
         {//落地时
             anim.SetBool("failing", false);
-            anim.SetBool("idle", true);
+            
         }
     }
 
@@ -120,9 +125,7 @@ public class PlayerController : MonoBehaviour
         {
             Cherry cherryObj = collision.GetComponent<Cherry>();
             cherryObj.BeCollect();
-            cherry++;
-            CherryNumber.text = cherry.ToString();
-        }
+                  }
         else if(collision.CompareTag("DeadLine")){
             GetComponent<AudioSource>().enabled = false;
             Invoke("Restart", 2f);
@@ -187,4 +190,9 @@ public class PlayerController : MonoBehaviour
     private void Restart() {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+
+    public void AddCherry()
+    {
+        cherry++;
+     }
 }

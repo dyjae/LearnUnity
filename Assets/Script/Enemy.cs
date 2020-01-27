@@ -18,6 +18,9 @@ public class Enemy: MonoBehaviour
     }
 
     private void IsDesdory() {
+        //关掉碰撞体
+        GetComponent<Collider2D>().enabled = false;
+        //销毁
         Destroy(this.gameObject);
     }
 

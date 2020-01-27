@@ -16,6 +16,7 @@ public class Cherry : MonoBehaviour
 
     public void OnDead()
     {
+        FindObjectOfType<PlayerController>().AddCherry();
         Destroy(transform.gameObject);
     }
 
