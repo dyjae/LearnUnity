@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -113,15 +112,20 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    //搜集物品
+    //碰撞判断器
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //搜集物品
         if (collision.CompareTag("Collection"))
         {
             Cherry cherryObj = collision.GetComponent<Cherry>();
             cherryObj.BeCollect();
             cherry++;
             CherryNumber.text = cherry.ToString();
+        }
+        else if(collision.CompareTag("DeadLine")){
+            GetComponent<AudioSource>().enabled = false;
+            Invoke("Restart", 2f);
         }
     }
 
@@ -166,17 +170,21 @@ public class PlayerController : MonoBehaviour
     {
         if (!Physics2D.OverlapCircle(cellingCheck.position, 0.2f, grouder))//判断上面是否有碰撞物
         {
-            if (Input.GetButtonDown("Crouch"))
+            if (Input.GetButton("Crouch"))
             {
                 anim.SetBool("crouching", true);
                 disColl.enabled = false;
             }
-            else if (Input.GetButtonUp("Crouch"))
+            else
             {
                 anim.SetBool("crouching", false);
                 disColl.enabled = true;
             }
         }
             
+    }
+
+    private void Restart() {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
