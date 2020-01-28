@@ -32,9 +32,6 @@ public class PlayerController : MonoBehaviour
 
     private bool isHurt;
 
-    public AudioSource jumpAudio;
-
-    public AudioSource hurtAudio;
 
     // 操作杆
     public Joystick joystick;
@@ -172,7 +169,7 @@ public class PlayerController : MonoBehaviour
     {
         if ((Input.GetButtonDown("Jump") || (joystick.enabled && joystick.Vertical > 0.5f)) && coll.IsTouchingLayers(grouder))
         {
-            jumpAudio.Play();
+            SoundManager.instance.JumpAudio();
             rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
             anim.SetBool("jumping", true);
         }
@@ -180,7 +177,7 @@ public class PlayerController : MonoBehaviour
 
     private void Hurt(int h)
     {
-        hurtAudio.Play();
+        SoundManager.instance.HurtAudio();
         rb.velocity = new Vector2(h, rb.velocity.y);
         isHurt = true;
     }

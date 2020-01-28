@@ -48,7 +48,7 @@ public class EnemyFrog : Enemy
     {
         if (isFaceLeft)
         {
-            Debug.Log(coll.name);
+            // Debug.Log(coll.name);
             if (coll.IsTouchingLayers(ground))
             {
                 anim.SetBool("jumping", true);

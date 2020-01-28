@@ -6,12 +6,9 @@ public class Cherry : MonoBehaviour
 {
     Animator anim;
 
-    AudioSource beCollectAudio;
-
     private void Start()
     {
         anim = GetComponent<Animator>();
-        beCollectAudio = GetComponent<AudioSource>();
     }
 
     public void OnDead()
@@ -22,7 +19,7 @@ public class Cherry : MonoBehaviour
 
     public void BeCollect()
     {
-        beCollectAudio.Play();
+        SoundManager.instance.CherryAudio();
         anim.SetBool("beCollect", true);
     }
 }
