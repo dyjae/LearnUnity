@@ -7,6 +7,9 @@ public class PlayerController : MonoBehaviour
     // 角色刚体
     [SerializeField] private Rigidbody2D rb;
 
+    // 玩家碰撞体
+    public Collider2D coll;
+
     // 动画
     private Animator anim;
 
@@ -15,12 +18,19 @@ public class PlayerController : MonoBehaviour
 
     // 跳跃
     public float jumpforce;
+    //地面监测
+    public Transform groundCheck;
 
     // 地面图层
-    public LayerMask grouder;
+    public LayerMask grounder;
 
-    // 玩家碰撞体
-    public Collider2D coll;
+    //是否在地面上，是否跳跃
+    public bool isGround, isJump;
+
+    public int jumpCount = 2;
+
+    public bool jumpPress;
+
 
     public Collider2D disColl;
 
@@ -45,67 +55,99 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (CheckJump())
+        {
+            jumpPress = true;
+        }
         CherryNumber.text = cherry.ToString();
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
+        isGround = Physics2D.OverlapCircle(groundCheck.position, 0.1f, grounder);
         if (!isHurt)
         {
-            //Debug.Log("移动了");
-            Movement();
+            GroundMovement();
+            Jump();
+            Crouch();
         }
         SwitchAnim();
+    }
+
+    void GroundMovement()
+    {
+        float horizontal = GetHorizontal();
+        rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
+        if (horizontal != 0)
+        {
+            transform.localScale = new Vector3(horizontal, 1, 1);
+        }
+    }
+
+    private void Jump()
+    {
+        if (isGround)
+        {
+            jumpCount = 2;
+            isJump = false;
+        }
+        if (jumpPress && isGround)
+        {
+            SoundManager.instance.JumpAudio();
+            isJump = true;
+            rb.velocity = new Vector2(rb.velocity.x, jumpforce);
+            jumpCount--;
+            jumpPress = false; // 确保只执行一次
+        }
+        else if (jumpPress && jumpCount > 0 && isJump)
+        {//在天上
+            SoundManager.instance.JumpAudio();
+            rb.velocity = new Vector2(rb.velocity.x, jumpforce);
+            jumpCount--;
+            jumpPress = false; // 确保只执行一次
+        }
+
+
 
     }
 
-    void Movement()
+    //跳跃监测
+    private bool CheckJump()
     {
+        return (Input.GetButtonDown("Jump") || (joystick.enabled && joystick.Vertical > 0.5f)) && jumpCount > 0;
+    }
 
-        //获取横向移动值
-        float horizontalMove = Input.GetAxis("Horizontal");
-        // float facedirection = Input.GetAxisRaw("Horizontal"); //直接获得  -1，0，1
+
+    private float GetHorizontal()
+    {
+        float horizontal = Input.GetAxisRaw("Horizontal");
         if (joystick.enabled && joystick.Horizontal != 0)
         {
-            horizontalMove = joystick.Horizontal;
+            horizontal = joystick.Horizontal;
         }
-        //Debug.Log(horizontalMove);
-        //不等于0时，表示有移动
-        if (horizontalMove != 0)
-        {
-            rb.velocity = new Vector2(horizontalMove * speed * Time.deltaTime, rb.velocity.y);
-            anim.SetFloat("running", Mathf.Abs(horizontalMove));
-        }
-        // 转向
-        if (horizontalMove > 0f)
-        {
-            transform.localScale = new Vector3(1, 1, 1);
-        }
-        else if (horizontalMove < 0f)
-        {
-            transform.localScale = new Vector3(-1, 1, 1);
-        }
-        // 跳跃
-
-        this.Jump();
-
-        //下蹲
-        Crouch();
+        return horizontal;
     }
 
     void SwitchAnim()
     {
+        anim.SetFloat("running", Mathf.Abs(rb.velocity.x));
 
-        if (anim.GetBool("jumping"))
-        {//跳跃时
-            if (rb.velocity.y < 0)
-            {
-                anim.SetBool("jumping", false);
-                anim.SetBool("failing", true);
-            }
+
+        if (isGround)
+        { //跑动
+            anim.SetBool("failing", false);
         }
-        else if (isHurt)
+        else if (rb.velocity.y > 0)
+        { //跳
+            anim.SetBool("jumping", true);
+        }
+        else if (rb.velocity.y < 0)
+        { //下落
+            anim.SetBool("jumping", false);
+            anim.SetBool("failing", true);
+        }
+
+        if (isHurt)
         {
             anim.SetBool("hurting", true);
             anim.SetFloat("running", 0);
@@ -115,14 +157,8 @@ public class PlayerController : MonoBehaviour
 
                 isHurt = false;
             }
-
-
         }
-        else if (coll.IsTouchingLayers(grouder))
-        {//落地时
-            anim.SetBool("failing", false);
 
-        }
     }
 
     //碰撞判断器
@@ -136,7 +172,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (collision.CompareTag("DeadLine"))
         {
-            GetComponent<AudioSource>().enabled = false;
+            SoundManager.instance.StopAll();
             Invoke("Restart", 2f);
         }
     }
@@ -147,16 +183,13 @@ public class PlayerController : MonoBehaviour
         {
             if (anim.GetBool("failing"))
             {
-                //Debug.Log("JUMP");
                 this.Jump();
                 Enemy enemy = collision.gameObject.GetComponent<Enemy>();
                 enemy.OnDead();
-                //Destroy(collision.gameObject);
             }
             else if (transform.position.x < collision.gameObject.transform.position.x)
             {//左侧移动
                 this.Hurt(-5);
-
             }
             else if (transform.position.x > collision.gameObject.transform.position.x)
             {//右侧移动
@@ -165,15 +198,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void Jump()
-    {
-        if ((Input.GetButtonDown("Jump") || (joystick.enabled && joystick.Vertical > 0.5f)) && coll.IsTouchingLayers(grouder))
-        {
-            SoundManager.instance.JumpAudio();
-            rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
-            anim.SetBool("jumping", true);
-        }
-    }
+
 
     private void Hurt(int h)
     {
@@ -185,9 +210,9 @@ public class PlayerController : MonoBehaviour
     //下蹲
     private void Crouch()
     {
-        if (!Physics2D.OverlapCircle(cellingCheck.position, 0.2f, grouder))//判断上面是否有碰撞物
+        if (!Physics2D.OverlapCircle(cellingCheck.position, 0.2f, grounder))//判断上面是否有碰撞物
         {
-            if ( (joystick.enabled && joystick.Vertical < -0.5f)||Input.GetButton("Crouch"))
+            if ((joystick.enabled && joystick.Vertical < -0.5f) || Input.GetButton("Crouch"))
             {
                 anim.SetBool("crouching", true);
                 disColl.enabled = false;

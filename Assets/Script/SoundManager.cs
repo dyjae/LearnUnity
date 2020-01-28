@@ -8,22 +8,44 @@ public class SoundManager : MonoBehaviour
     public AudioSource audioSource;
 
     [SerializeField]
-    private AudioClip jumpAudio,hurtAudio,cherryAudio;
+    private AudioClip jumpAudio, hurtAudio, cherryAudio;
 
-    private void Awake() {
-        instance = this;
+    public bool isPlaySound = true;
+
+   private void Awake() {
+       instance = this;
+   }
+
+    public void JumpAudio()
+    {
+        if (isPlaySound)
+        {
+            audioSource.clip = jumpAudio;
+            audioSource.Play();
+        }
+    }
+    public void CherryAudio()
+    {
+        if (isPlaySound)
+        {
+            audioSource.clip = cherryAudio;
+            audioSource.Play();
+        }
+
+    }
+    public void HurtAudio()
+    {
+        if (isPlaySound)
+        {
+            audioSource.clip = jumpAudio;
+            audioSource.Play();
+        }
     }
 
-    public void JumpAudio(){
-        audioSource.clip = jumpAudio;  
-        audioSource.Play();  
-    }
-    public void CherryAudio(){
-        audioSource.clip = cherryAudio;
-        audioSource.Play();
-    }
-    public void HurtAudio(){
-        audioSource.clip = jumpAudio;   
-        audioSource.Play();
+    public void StopAll(){
+        AudioSource[] source =  GetComponents<AudioSource>();
+        for(int i = 0 ; i<source.Length;i ++){
+            source[i].enabled = false;
+        }
     }
 }
